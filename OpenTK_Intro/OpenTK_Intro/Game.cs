@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using OpenTK.Graphics.OpenGL4;
 using System.IO;
 using OpenTK.Graphics;
+using System.Drawing;
 
 namespace OpenTK_Intro
 {
@@ -14,6 +15,7 @@ namespace OpenTK_Intro
     {
         int programId;
         int vertexArrayId;
+        int texId;
 
         Matrix4 projectionMatrix;
         Matrix4 viewMatrix;
@@ -64,17 +66,43 @@ namespace OpenTK_Intro
                 7,3,0
         };
 
-        Vector3[] colors = new Vector3[]
+        Vector2[] texCoords = new[]
         {
-            Vector3.UnitX,
-            Vector3.UnitY,
-            Vector3.UnitZ,
-            Vector3.One,
-            Vector3.Zero,
-            new Vector3(1,1,0),
-            new Vector3(0,1,1),
-            new Vector3(1,0,1),
+            // front
+            new Vector2(1.0f, 1.0f),
+            new Vector2(1.0f, 0.0f),
+            new Vector2(0.0f, 0.0f),
+            new Vector2(0.0f, 1.0f),
 
+            // back
+             new Vector2(0.0f, 1.0f),
+            new Vector2(0.0f, 0.0f),
+            new Vector2(1.0f, 0.0f),
+            new Vector2(1.0f, 1.0f),
+
+            // left
+            new Vector2(1.0f, 0.0f),
+            new Vector2(1.0f, 1.0f),
+            new Vector2(1.0f, 1.0f),
+            new Vector2(1.0f, 0.0f),
+
+            // right
+            new Vector2(0.0f, 0.0f),
+            new Vector2(0.0f, 1.0f),
+            new Vector2(1.0f, 1.0f),
+            new Vector2(1.0f, 0.0f),
+
+            // front
+          new Vector2(1.0f, 0.0f),
+            new Vector2(1.0f, 1.0f),
+            new Vector2(0.0f, 1.0f),
+            new Vector2(0.0f, 0.0f),
+
+            // bottom
+             new Vector2(1.0f, 0.0f),
+            new Vector2(1.0f, 1.0f),
+            new Vector2(0.0f, 1.0f),
+            new Vector2(0.0f, 0.0f),
         };
 
         protected override void OnLoad(EventArgs e)
@@ -108,38 +136,55 @@ namespace OpenTK_Intro
             GL.Viewport(0, 0, Width, Height);
 
             LoadUniforms();
+            LoadTexture();
         }
 
         private void LoadBuffers()
         {
             var positionAttributeLocation = GL.GetAttribLocation(programId, "a_verts");
-            var colorAttributeLocation = GL.GetAttribLocation(programId, "a_colors");
+            var texCoordsAttribLocation = GL.GetAttribLocation(programId, "a_texCoords");
 
             GL.BindAttribLocation(programId, positionAttributeLocation, "a_verts");
-            GL.BindAttribLocation(programId, colorAttributeLocation, "a_colors");
+            GL.BindAttribLocation(programId, texCoordsAttribLocation, "a_texCoords");
 
             vertexArrayId = GL.GenVertexArray();
             GL.BindVertexArray(vertexArrayId);
 
             var positionBuffer = GL.GenBuffer();
             GL.BindBuffer(BufferTarget.ArrayBuffer, positionBuffer);
-            GL.BufferData<Vector3>(BufferTarget.ArrayBuffer,(IntPtr)(cubeVertices.Count() * Vector3.SizeInBytes),
+            GL.BufferData<Vector3>(BufferTarget.ArrayBuffer, (IntPtr)(cubeVertices.Count() * Vector3.SizeInBytes),
                 cubeVertices, BufferUsageHint.StaticDraw);
             GL.VertexAttribPointer(positionAttributeLocation, 3, VertexAttribPointerType.Float, false, 0, 0);
 
-            var colorBuffer = GL.GenBuffer();
-            GL.BindBuffer(BufferTarget.ArrayBuffer, colorBuffer);
-            GL.BufferData<Vector3>(BufferTarget.ArrayBuffer, (IntPtr)(colors.Count() * Vector3.SizeInBytes),
-                colors.ToArray(), BufferUsageHint.StaticDraw);
-            GL.VertexAttribPointer(colorAttributeLocation, 3, VertexAttribPointerType.Float, false, 0, 0);
+            var textureBuffer = GL.GenBuffer();
+            GL.BindBuffer(BufferTarget.ArrayBuffer, textureBuffer);
+            GL.BufferData<Vector2>(BufferTarget.ArrayBuffer, (IntPtr)(texCoords.Count() * Vector2.SizeInBytes), texCoords, BufferUsageHint.StaticDraw);
+            GL.VertexAttribPointer(texCoordsAttribLocation, 2, VertexAttribPointerType.Float, false, 0,0);
 
             var indexBuffer = GL.GenBuffer();
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, indexBuffer);
             GL.BufferData<int>(BufferTarget.ElementArrayBuffer, (IntPtr)(indices.Length * sizeof(int)), indices, BufferUsageHint.StaticDraw);
 
             GL.EnableVertexAttribArray(positionAttributeLocation);
-            GL.EnableVertexAttribArray(colorAttributeLocation);
+            GL.EnableVertexAttribArray(texCoordsAttribLocation);
         }
+
+        private void LoadTexture()
+        {
+            var bitmap = new Bitmap(Bitmap.FromFile("fatcat.png"));
+            var data = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), System.Drawing.Imaging.ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+
+            texId = GL.GenTexture();
+            GL.BindTexture(TextureTarget.Texture2D, texId);
+
+            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, bitmap.Width, bitmap.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, data.Scan0);
+           
+
+            bitmap.UnlockBits(data);
+
+            GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
+        }
+
 
         private void LoadUniforms()
         {
@@ -179,6 +224,9 @@ namespace OpenTK_Intro
 
             GL.BindVertexArray(vertexArrayId);
 
+            GL.ActiveTexture(TextureUnit.Texture0);
+            GL.BindTexture(TextureTarget.Texture2D, texId);
+            
             GL.DrawElements(PrimitiveType.Triangles, 36, DrawElementsType.UnsignedInt, 0);
 
             SwapBuffers();

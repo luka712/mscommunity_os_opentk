@@ -4,15 +4,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Fixed_Pipeline
+namespace Example_1_triangle
 {
     class Program
     {
         static void Main(string[] args)
         {
-            using(var game = new Game())
+            using(Game game = new Game())
             {
-                game.Run(30.0);
+                game.Run(60.0);
             }
         }
     }

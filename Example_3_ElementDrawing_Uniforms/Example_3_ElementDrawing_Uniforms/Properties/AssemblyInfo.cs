@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Fixed_Pipeline")]
+[assembly: AssemblyTitle("Example_3_ElementDrawing_Uniforms")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("Fixed_Pipeline")]
+[assembly: AssemblyProduct("Example_3_ElementDrawing_Uniforms")]
 [assembly: AssemblyCopyright("Copyright ©  2016")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("42571e7c-2dc1-4698-b25f-79aac9c0dd0e")]
+[assembly: Guid("0b9469a1-7a33-4218-a883-082d8cd84ae0")]
 
 // Version information for an assembly consists of the following four values:
 //
